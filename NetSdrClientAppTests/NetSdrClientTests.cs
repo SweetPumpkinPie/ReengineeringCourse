@@ -115,5 +115,20 @@ public class NetSdrClientTests
         Assert.That(_client.IQStarted, Is.False);
     }
 
-    //TODO: cover the rest of the NetSdrClient code here
+    [Test]
+    public async Task ChangeFrequencyAsyncTest()
+    {
+        // Arrange
+        await ConnectAsyncTest();
+        long testFrequency = 100000000; // 100 MHz
+        int testChannel = 1;
+
+        // Act
+        await _client.ChangeFrequencyAsync(testFrequency, testChannel);
+
+        // Assert
+        // Ensure the client has sent at least one message via TCP after calling the method
+        // Expect 4 calls: 3 were in ConnectAsync + 1 (new frequency change request)
+        _tcpMock.Verify(tcp => tcp.SendMessageAsync(It.IsAny<byte[]>()), Times.Exactly(4));
+    }
 }
