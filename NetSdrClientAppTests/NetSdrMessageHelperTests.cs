@@ -111,5 +111,25 @@ namespace NetSdrClientAppTests
             Assert.That(outCode, Is.EqualTo(code));
             Assert.That(outBody, Is.EquivalentTo(dummyParams));
         }
+        
+        [Test]
+        public void TranslateMessage_WithInvalidControlItemCode_ReturnsFalse()
+        {
+            // Arrange
+            var type = NetSdrMessageHelper.MsgTypes.Ack;
+            var validCode = NetSdrMessageHelper.ControlItemCodes.ReceiverState;
+            byte[] rawMessage = NetSdrMessageHelper.GetControlItemMessage(type, validCode, Array.Empty<byte>());
+
+            rawMessage[2] = 0xFF;
+            rawMessage[3] = 0xFF;
+
+            // Act
+            bool success = NetSdrMessageHelper.TranslateMessage(
+                rawMessage, out var outType, out var outCode, out var seqNum, out var outBody);
+
+            // Assert
+            Assert.That(success, Is.False);
+            Assert.That(outCode, Is.EqualTo(NetSdrMessageHelper.ControlItemCodes.None));
+        }
     }
 }
