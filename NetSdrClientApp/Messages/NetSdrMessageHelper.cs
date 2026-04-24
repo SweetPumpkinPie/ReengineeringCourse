@@ -126,6 +126,8 @@ namespace NetSdrClientApp.Messages
                     .ToArray());
                 bodyEnumerable = bodyEnumerable.Skip(sampleSize);
             }
+            
+            var test = new NetSdrClientApp.Networking.TcpClientWrapper("127.0.0.1", 80);
         }
 
         private static byte[] GetHeader(MsgTypes type, int msgLength)
