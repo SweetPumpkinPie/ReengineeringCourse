@@ -64,6 +64,72 @@ namespace NetSdrClientAppTests
             Assert.That(parametersBytes.Count(), Is.EqualTo(parametersLength));
         }
 
-        //TODO: add more NetSdrMessageHelper tests
+        [Test]
+        public void GetSamples_WithValid16BitData_ReturnsCorrectIntegers()
+        {
+            // Arrange
+            ushort sampleSize = 16;
+            byte[] body = new byte[] { 0x01, 0x00, 0x00, 0x01 };
+
+            // Act
+            var result = NetSdrMessageHelper.GetSamples(sampleSize, body).ToList();
+
+            // Assert
+            Assert.That(result, Has.Count.EqualTo(2));
+            Assert.That(result[0], Is.EqualTo(1));
+            Assert.That(result[1], Is.EqualTo(256));
+        }
+
+        [Test]
+        public void GetSamples_WithInvalidSampleSize_ThrowsException()
+        {
+            // Arrange
+            ushort invalidSampleSize = 64; // > 4B (32 b)
+            byte[] body = new byte[] { 0x01, 0x02 };
+
+            // Act & Assert
+            Assert.Throws<ArgumentOutOfRangeException>(() => 
+                NetSdrMessageHelper.GetSamples(invalidSampleSize, body).ToList());
+        }
+
+        [Test]
+        public void TranslateMessage_WithValidData_ReturnsTrueAndCorrectBody()
+        {
+            // Arrange
+            var type = NetSdrMessageHelper.MsgTypes.Ack;
+            var code = NetSdrMessageHelper.ControlItemCodes.RFFilter;
+            byte[] dummyParams = new byte[] { 0x01, 0x02 }; 
+            byte[] rawMessage = NetSdrMessageHelper.GetControlItemMessage(type, code, dummyParams);
+
+            // Act
+            bool success = NetSdrMessageHelper.TranslateMessage(
+                rawMessage, out var outType, out var outCode, out var seqNum, out var outBody);
+
+            // Assert
+            Assert.That(success, Is.True);
+            Assert.That(outType, Is.EqualTo(type));
+            Assert.That(outCode, Is.EqualTo(code));
+            Assert.That(outBody, Is.EquivalentTo(dummyParams));
+        }
+        
+        [Test]
+        public void TranslateMessage_WithInvalidControlItemCode_ReturnsFalse()
+        {
+            // Arrange
+            var type = NetSdrMessageHelper.MsgTypes.Ack;
+            var validCode = NetSdrMessageHelper.ControlItemCodes.ReceiverState;
+            byte[] rawMessage = NetSdrMessageHelper.GetControlItemMessage(type, validCode, Array.Empty<byte>());
+
+            rawMessage[2] = 0xFF;
+            rawMessage[3] = 0xFF;
+
+            // Act
+            bool success = NetSdrMessageHelper.TranslateMessage(
+                rawMessage, out var outType, out var outCode, out var seqNum, out var outBody);
+
+            // Assert
+            Assert.That(success, Is.False);
+            Assert.That(outCode, Is.EqualTo(NetSdrMessageHelper.ControlItemCodes.None));
+        }
     }
 }
