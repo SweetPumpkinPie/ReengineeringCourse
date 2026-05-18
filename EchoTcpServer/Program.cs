@@ -19,7 +19,7 @@ namespace EchoTcpServerApp;
 public class EchoServer
 {
     private readonly ITcpListenerWrapper _listener;
-    private CancellationTokenSource _cancellationTokenSource;
+    private readonly CancellationTokenSource _cancellationTokenSource;
 
 
     public EchoServer(ITcpListenerWrapper listener)
@@ -52,7 +52,7 @@ public class EchoServer
         Console.WriteLine("Server shutdown.");
     }
 
-    private async Task HandleClientAsync(ITcpClientWrapper client, CancellationToken token)
+    private static async Task HandleClientAsync(ITcpClientWrapper client, CancellationToken token)
     {
         using (NetworkStream stream = client.GetStream())
         {
