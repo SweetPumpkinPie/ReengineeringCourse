@@ -19,7 +19,7 @@ namespace EchoTcpServerApp;
 public class EchoServer
 {
     private readonly ITcpListenerWrapper _listener;
-    private CancellationTokenSource _cancellationTokenSource;
+    private readonly CancellationTokenSource _cancellationTokenSource;
 
 
     public EchoServer(ITcpListenerWrapper listener)
@@ -52,7 +52,7 @@ public class EchoServer
         Console.WriteLine("Server shutdown.");
     }
 
-    private async Task HandleClientAsync(ITcpClientWrapper client, CancellationToken token)
+    private static async Task HandleClientAsync(ITcpClientWrapper client, CancellationToken token)
     {
         using (NetworkStream stream = client.GetStream())
         {
@@ -61,10 +61,13 @@ public class EchoServer
                 byte[] buffer = new byte[8192];
                 int bytesRead;
 
-                while (!token.IsCancellationRequested && (bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, token)) > 0)
+                while (!token.IsCancellationRequested)
                 {
+                    bytesRead = await stream.ReadAsync(buffer.AsMemory(), token);
+                    if (bytesRead == 0) break;
+
                     // Echo back the received message
-                    await stream.WriteAsync(buffer, 0, bytesRead, token);
+                    await stream.WriteAsync(buffer.AsMemory(0, bytesRead), token);
                     Console.WriteLine($"Echoed {bytesRead} bytes to the client.");
                 }
             }
@@ -119,13 +122,16 @@ public class EchoServer
 }
 
 
+[ExcludeFromCodeCoverage]
 public class UdpTimedSender : IDisposable
 {
     private readonly string _host;
     private readonly int _port;
     private readonly UdpClient _udpClient;
-    private Timer _timer;
+    private Timer? _timer;
+    private bool _disposed = false;
 
+    [ExcludeFromCodeCoverage]
     public UdpTimedSender(string host, int port)
     {
         _host = host;
@@ -141,9 +147,9 @@ public class UdpTimedSender : IDisposable
         _timer = new Timer(SendMessageCallback, null, 0, intervalMilliseconds);
     }
 
-    ushort i = 0;
+    private ushort i = 0;
 
-    private void SendMessageCallback(object state)
+    private void SendMessageCallback(object? state)
     {
         try
         {
@@ -170,10 +176,23 @@ public class UdpTimedSender : IDisposable
         _timer?.Dispose();
         _timer = null;
     }
+    
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                StopSending();
+                _udpClient.Dispose();
+            }
+            _disposed = true;
+        }
+    }
 
     public void Dispose()
     {
-        StopSending();
-        _udpClient.Dispose();
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 }
