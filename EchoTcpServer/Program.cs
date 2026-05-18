@@ -11,28 +11,26 @@ using System.Threading.Tasks;
 /// </summary>
 public class EchoServer
 {
-    private readonly int _port;
-    private TcpListener _listener;
+    private readonly ITcpListenerWrapper _listener;
     private CancellationTokenSource _cancellationTokenSource;
 
 
-    public EchoServer(int port)
+    public EchoServer(ITcpListenerWrapper listener)
     {
-        _port = port;
+        _listener = listener;
         _cancellationTokenSource = new CancellationTokenSource();
     }
 
     public async Task StartAsync()
     {
-        _listener = new TcpListener(IPAddress.Any, _port);
         _listener.Start();
-        Console.WriteLine($"Server started on port {_port}.");
+        Console.WriteLine($"Server started.");
 
         while (!_cancellationTokenSource.Token.IsCancellationRequested)
         {
             try
             {
-                TcpClient client = await _listener.AcceptTcpClientAsync();
+                ITcpClientWrapper client = await _listener.AcceptTcpClientAsync();
                 Console.WriteLine("Client connected.");
 
                 _ = Task.Run(() => HandleClientAsync(client, _cancellationTokenSource.Token));
@@ -47,7 +45,7 @@ public class EchoServer
         Console.WriteLine("Server shutdown.");
     }
 
-    private async Task HandleClientAsync(TcpClient client, CancellationToken token)
+    private async Task HandleClientAsync(ITcpClientWrapper client, CancellationToken token)
     {
         using (NetworkStream stream = client.GetStream())
         {
@@ -85,7 +83,8 @@ public class EchoServer
 
     public static async Task Main(string[] args)
     {
-        EchoServer server = new EchoServer(5000);
+        ITcpListenerWrapper realListener = new RealTcpListenerWrapper(5000);
+        EchoServer server = new EchoServer(realListener);
 
         // Start the server in a separate task
         _ = Task.Run(() => server.StartAsync());
