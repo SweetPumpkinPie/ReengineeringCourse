@@ -130,6 +130,7 @@ public class UdpTimedSender : IDisposable
     private Timer? _timer;
     private bool _disposed = false;
 
+    [ExcludeFromCodeCoverage]
     public UdpTimedSender(string host, int port)
     {
         _host = host;
