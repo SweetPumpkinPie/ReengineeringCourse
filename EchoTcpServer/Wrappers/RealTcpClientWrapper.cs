@@ -2,7 +2,11 @@
 using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
+namespace EchoTcpServerApp.Wrappers;
+
+[ExcludeFromCodeCoverage]
 public class RealTcpClientWrapper : ITcpClientWrapper
 {
     private readonly TcpClient _client;

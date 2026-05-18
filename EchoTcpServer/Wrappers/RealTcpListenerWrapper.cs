@@ -1,6 +1,10 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using System.Diagnostics.CodeAnalysis;
 
+namespace EchoTcpServerApp.Wrappers;
+
+[ExcludeFromCodeCoverage]
 public class RealTcpListenerWrapper : ITcpListenerWrapper
 {
     private readonly TcpListener _listener;

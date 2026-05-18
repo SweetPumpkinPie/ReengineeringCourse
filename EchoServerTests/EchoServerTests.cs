@@ -3,7 +3,7 @@ using Moq;
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace EchoServerTests;
+namespace EchoTcpServerApp.Wrappers;
 
 public class EchoServerLogicTests
 {

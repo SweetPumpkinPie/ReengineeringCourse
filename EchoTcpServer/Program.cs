@@ -4,11 +4,18 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
+
+using EchoTcpServerApp.Wrappers;
+
+namespace EchoTcpServerApp;
 
 /// <summary>
 /// This program was designed for test purposes only
 /// Not for a review
 /// </summary>
+
+[ExcludeFromCodeCoverage]
 public class EchoServer
 {
     private readonly ITcpListenerWrapper _listener;
