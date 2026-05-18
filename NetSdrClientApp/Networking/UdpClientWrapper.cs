@@ -62,6 +62,12 @@ public class UdpClientWrapper : IUdpClient
         }
     }
 
+    public override bool Equals(object? obj)
+    {
+        return obj is UdpClientWrapper other && 
+               _localEndPoint.Equals(other._localEndPoint);
+    }
+    
     public override int GetHashCode()
     {
         var payload = $"{nameof(UdpClientWrapper)}|{_localEndPoint.Address}|{_localEndPoint.Port}";
