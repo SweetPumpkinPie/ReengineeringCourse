@@ -5,9 +5,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NetSdrClientApp.Networking;
 
+[ExcludeFromCodeCoverage]
 public class UdpClientWrapper : IUdpClient
 {
     private readonly IPEndPoint _localEndPoint;
