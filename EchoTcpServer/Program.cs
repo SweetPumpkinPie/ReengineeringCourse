@@ -122,6 +122,7 @@ public class EchoServer
 }
 
 
+[ExcludeFromCodeCoverage]
 public class UdpTimedSender : IDisposable
 {
     private readonly string _host;
