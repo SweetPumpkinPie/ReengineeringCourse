@@ -128,6 +128,7 @@ public class UdpTimedSender : IDisposable
     private readonly int _port;
     private readonly UdpClient _udpClient;
     private Timer? _timer;
+    private bool _disposed = false;
 
     public UdpTimedSender(string host, int port)
     {
@@ -144,7 +145,7 @@ public class UdpTimedSender : IDisposable
         _timer = new Timer(SendMessageCallback, null, 0, intervalMilliseconds);
     }
 
-    ushort i = 0;
+    private ushort i = 0;
 
     private void SendMessageCallback(object? state)
     {
@@ -173,10 +174,23 @@ public class UdpTimedSender : IDisposable
         _timer?.Dispose();
         _timer = null;
     }
+    
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed)
+        {
+            if (disposing)
+            {
+                StopSending();
+                _udpClient.Dispose();
+            }
+            _disposed = true;
+        }
+    }
 
     public void Dispose()
     {
-        StopSending();
-        _udpClient.Dispose();
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 }
