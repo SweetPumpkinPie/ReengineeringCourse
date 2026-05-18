@@ -108,7 +108,7 @@ namespace NetSdrClientApp.Messages
         public static IEnumerable<int> GetSamples(ushort sampleSize, byte[] body)
         {
             int sampleSizeBytes = sampleSize / 8; //to bytes
-            if (sampleSize > 4)
+            if (sampleSizeBytes > 4)
             {
                 throw new ArgumentOutOfRangeException(nameof(sampleSize),
                     "Sample size must be 32 bits (4 bytes) or less.");
